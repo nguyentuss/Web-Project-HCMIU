@@ -5,15 +5,16 @@ import Cookies from 'js-cookie';
 
 export const useUserStore = create((set) => ({
 	user: null,
+	userInfo: [],
 	token: null,
 	loading: false,
 	checkingAuth: false,
 	isUpdatingProfile: false,
 
-	signup: async ({ username, email, phoneNumber, password }) => {
+	signup: async ({ username, email, password }) => {
 		set({ loading: true });
 		try {
-			await axios.post("/auth/signup", { username, email, phoneNumber, password });
+			await axios.post("http://localhost:8080/api/auth/signup", { username, email, password });
 			toast.success("Signup successful. Please login.");
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred during signup");
@@ -22,7 +23,7 @@ export const useUserStore = create((set) => ({
 		}
 	},
 
-	login: async (username, password) => {
+	login: async ({ username, password }) => {
 		set({ loading: true });
 		try {
 			const res = await axios.post("http://localhost:8080/api/auth/signin", 
@@ -53,23 +54,24 @@ export const useUserStore = create((set) => ({
 		}
 	},
 
+	fetchUser: async (id) => {
+		set({ loading: true });
+		try {
+			const res = await axios.get(`http://localhost:8080/api/users/${id}`, { withCredentials: true });
+			set({ userInfo: res.data, loading: false });
+		} catch (error) {
+			set({ error: "Failed to fetch user", loading: false });
+			toast.error(error.response.data.error || "Failed to fetch user");
+		}
+	},
+
 	updateProfile: async (data) => {
 		set({ isUpdatingProfile: true });
 		try {
-			const { token } = useUserStore.getState(); // Get token from store
-			const res = await axios.put("http://localhost:8080/api/uploads/avatar", 
-				data,
-				{
-					headers: {
-						Authorization: `Bearer ${token}`,
-					}
-				},
-				{ withCredentials: true }
-			);
-			set({ user: res.data });
+			const res = await axios.put("http://localhost:8080/api/uploads/avatar", data, { withCredentials: true });
 			toast.success("Profile updated successfully");
 		} catch (error) {
-			toast.error(error.response?.data?.message || "Error updating profile");
+			toast.error(error.response?.data?.message);
 		} finally {
 			set({ isUpdatingProfile: false });
 		}

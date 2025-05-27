@@ -1,54 +1,11 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
+
+import { useVideoStore } from "../stores/useVideoStore";
 
 import VideoThumbnail from './VideoThumbnail';
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid"
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 
-const videoIds = [
-    {
-        id: 1,
-        title: "NGỰA Ô - TeuYungBoy, Dangrangto (Prod. DONAL) | Official MV",
-        description: "Music video of NGỰA Ô",
-        videoId: "cm0C1c2UuQA"
-    },
-    {
-        id: 2,
-        title: "2GOILAYS - DMT, Dangrangto, TeuYungBoy (Prod. DONAL) | Official MV",
-        description: "Music video of 2GOILAYS",
-        videoId: "ILsA2VFJ150"
-    },
-    {
-        id: 3,
-        title: "DONALD GOLD - ADAMN [OFFICIAL MV]",
-        description: "Music video of ADAMN",
-        videoId: "B3wR-ZVe0Rw"
-    },
-    {
-        id: 4,
-        title: "DONALD GOLD - ĐỔI TƯ THẾ x ANDREE RIGHT HAND | OFFICIAL MUSIC VIDEO",
-        description: "Music video of Đổi Tư Thế",
-        videoId: "wkMwq6NUUmM"
-    },
-    {
-        id: 5,
-        title: "HIEUTHUHAI - TRÌNH (prod. by Kewtiie)",
-        description: "Music video of TRÌNH",
-        videoId: "7kO_ALcwNAw"
-    },
-    {
-        id: 6,
-        title: "THANHDRAW - IDOOMYTHANG // Official Music Video",
-        description: "Music video of IDOOMYTHANG",
-        videoId: "rAJnKTZAGsU"
-    },
-    {
-        id: 7,
-        title: "HIEUTHUHAI - Không Thể Say (prod. by Kewtiie) [Official Lyric Video]",
-        description: "Music video of Không Thể Say",
-        videoId: "d6pgocXnK8U"
-    }
-];
-
-const VideoSection = ({name}) => {
+const VideoSection = ({cid, name}) => {
     const scrollRef = useRef(null);
 
     const scroll = (offset) => {
@@ -56,6 +13,15 @@ const VideoSection = ({name}) => {
             scrollRef.current.scrollBy({ left: offset, behavior: "smooth" });
         }
     };
+
+    // Fetch & Filter Videos
+    const { videos, fetchAllVideos, loading } = useVideoStore();
+
+    useEffect(() => {
+        fetchAllVideos();
+    }, [fetchAllVideos]);
+
+    const filteredVideos = videos.filter(video => String(video.categoryId) === String(cid));
 
     return (
         <div className="bg-black py-8">
@@ -71,9 +37,9 @@ const VideoSection = ({name}) => {
                 </button>
 
                 <div ref={scrollRef} className="relative flex overflow-x-auto space-x-4 no-scrollbar scroll-smooth">
-                    {videoIds.map(video => {
+                    {filteredVideos.map(video => {
                         return (
-                            <VideoThumbnail key={video.id} title={video.title} description={video.description} videoId={video.videoId} />
+                            <VideoThumbnail key={video.id} videoId={video.id} title={video.title} description={video.description} url={video.url} thumbnailUrl={video.thumbnailUrl} />
                         )
                     })}
                 </div>

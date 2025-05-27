@@ -1,11 +1,12 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../config/axios";
 import toast from "react-hot-toast";
 import Cookies from 'js-cookie';
 
 export const useVideoStore = create((set) => ({
 	videos: [],
 	video: [],
+	searchResults: [],
 	loading: false,
 
 	setVideos: (videos) => set({ videos }),
@@ -13,12 +14,7 @@ export const useVideoStore = create((set) => ({
 	createVideo: async (videoData) => {
 		set({ loading: true });
 		try {
-			const token = Cookies.get('token');
-			const res = await axios.post("/videos", videoData, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				}
-			});
+			const res = await axios.post("/videos", videoData, { withCredentials: true });
 			set((prevState) => ({
 				videos: [...prevState.videos, res.data],
 				loading: false,
@@ -32,6 +28,8 @@ export const useVideoStore = create((set) => ({
 	fetchAllVideos: async () => {
 		set({ loading: true });
 		try {
+			const response = await axios.get("/videos", { withCredentials: true });
+			/*
 			const token = Cookies.get('token');
 			const response = await axios.get("http://localhost:8080/api/videos", {
 				headers: {
@@ -39,6 +37,7 @@ export const useVideoStore = create((set) => ({
 				}
 			});
 			console.log(response.data)
+			*/
 			set({ videos: response.data, loading: false });
 		} catch (error) {
 			set({ error: "Failed to fetch videos", loading: false });
@@ -49,12 +48,7 @@ export const useVideoStore = create((set) => ({
 	fetchVideo: async (id) => {
 		set({ loading: true });
 		try {
-			const token = Cookies.get('token');
-			const response = await axios.get(`http://localhost:8080/api/videos/${id}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				}
-			});
+			const response = await axios.get(`/videos/${id}`, { withCredentials: true });
 			set({ video: response.data, loading: false });
 		} catch (error) {
 			set({ error: "Failed to fetch videos", loading: false });
@@ -77,16 +71,22 @@ export const useVideoStore = create((set) => ({
 			toast.error(error.response.data.error || "Failed to fetch videos");
 		}
 	},
+
+	fetchVideosBySearch: async (keyword) => {
+		set({ loading: true });
+		try {
+			const res = await axios.get(`/videos/search?title=${keyword}`, { withCredentials: true });
+			set({ searchResults: res.data, loading: false });
+		} catch (error) {
+			set({ error: "Failed to fetch search results", loading: false });
+			toast.error(error.response.data.error || "Failed to fetch search results");
+		}
+	},
 	
 	deleteVideo: async (videoId) => {
 		set({ loading: true });
 		try {
-			const token = Cookies.get('token');
-			await axios.delete(`/videos/${videoId}`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				}
-			});
+			await axios.delete(`/videos/${videoId}`, { withCredentials: true });
 			set((prevVideos) => ({
 				videos: prevVideos.videos.filter((video) => video._id !== videoId),
 				loading: false,
@@ -94,42 +94,6 @@ export const useVideoStore = create((set) => ({
 		} catch (error) {
 			set({ loading: false });
 			toast.error(error.response.data.error || "Failed to delete video");
-		}
-	},
-
-	fetchReviews: async (videoId) => {
-		set({ loading: true });
-		try {
-			const token = Cookies.get('token');
-			const response = await axios.get(`/ratings`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				}
-			});
-			set({ reviews: response.data.video.reviews, loading: false });
-		} catch (error) {
-			set({ error: "Failed to fetch reviews", loading: false });
-			toast.error(error.response.data.error || "Failed to fetch videos");
-		}
-	},
-
-	createReview: async (videoId, reviewData) => {
-		set({ loading: true });
-		try {
-			const token = Cookies.get('token');
-			const res = await axios.post(`/ratings`, reviewData, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				}
-			});
-			console.log(res.data)
-			set((prevState) => ({
-				reviews: [...prevState.reviews, res.data],
-				loading: false,
-			}));
-		} catch (error) {
-			toast.error(error.response.data.error);
-			set({ loading: false });
 		}
 	},
 }));
