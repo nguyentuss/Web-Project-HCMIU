@@ -9,14 +9,18 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: [{ find: "@", replacement: resolve(__dirname, "./src") }]
+    alias: [{ find: "@", replacement: resolve(__dirname, "./src") }],
   },
   server: {
-    host: '0.0.0.0',
-    port: 5173,
+    host: '0.0.0.0', // Allows external access (needed for Docker)
+    port: 5173, // Default Vite port
     watch: {
-      usePolling: true,
-      interval: 1000
-    }
-  }
+      usePolling: true, // Useful for Docker filesystem watching
+      interval: 1000,
+    },
+    allowedHosts: [
+      'hcmiu-project-web.id.vn', 
+      'localhost', 
+    ],
+  },
 })
