@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import axios from "../config/axios";
 import { toast } from "react-hot-toast";
 import Cookies from 'js-cookie';
 
@@ -14,7 +14,7 @@ export const useUserStore = create((set) => ({
 	signup: async ({ username, email, password }) => {
 		set({ loading: true });
 		try {
-			await axios.post("http://localhost:8080/api/auth/signup", { username, email, password });
+			await axios.post("/auth/signup", { username, email, password });
 			toast.success("Signup successful. Please login.");
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred during signup");
@@ -26,7 +26,7 @@ export const useUserStore = create((set) => ({
 	login: async ({ username, password }) => {
 		set({ loading: true });
 		try {
-			const res = await axios.post("http://localhost:8080/api/auth/signin", 
+			const res = await axios.post("/auth/signin", 
 				{ username, password },
 				{ withCredentials: true}
 			);
@@ -47,7 +47,7 @@ export const useUserStore = create((set) => ({
 
 	logout: async () => {
 		try {
-			await axios.post("http://localhost:8080/api/auth/logout", {}, { withCredentials: true });
+			await axios.post("/auth/logout", {}, { withCredentials: true });
 			set({ user: null });
 		} catch (error) {
 			toast.error(error.response?.data?.message || "Error during logout");
@@ -57,7 +57,7 @@ export const useUserStore = create((set) => ({
 	fetchUser: async (id) => {
 		set({ loading: true });
 		try {
-			const res = await axios.get(`http://localhost:8080/api/users/${id}`, { withCredentials: true });
+			const res = await axios.get(`/users/${id}`, { withCredentials: true });
 			set({ userInfo: res.data, loading: false });
 		} catch (error) {
 			set({ error: "Failed to fetch user", loading: false });
@@ -68,7 +68,7 @@ export const useUserStore = create((set) => ({
 	updateProfile: async (data) => {
 		set({ isUpdatingProfile: true });
 		try {
-			const res = await axios.put("http://localhost:8080/api/uploads/avatar", data, { withCredentials: true });
+			const res = await axios.post("/uploads/avatar", data, { withCredentials: true });
 			toast.success("Profile updated successfully");
 		} catch (error) {
 			toast.error(error.response?.data?.message);
@@ -80,7 +80,7 @@ export const useUserStore = create((set) => ({
 	checkAuth: async () => {
 		set({ checkingAuth: true });
 		try {
-			const res = await axios.get("http://localhost:8080/api/auth/me", { withCredentials: true });
+			const res = await axios.get("/auth/me", { withCredentials: true });
 			set({
 				user: res.data,
 				checkingAuth: false
