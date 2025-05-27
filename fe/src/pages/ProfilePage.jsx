@@ -13,15 +13,16 @@ const ProfilePage = () => {
         const file = e.target.files[0];
         if (!file) return;
     
-        const reader = new FileReader();
-    
-        reader.readAsDataURL(file);
-    
-        reader.onload = async () => {
-            const base64Image = reader.result;
-            setSelectedImg(base64Image);
-            await updateProfile({ file: base64Image });
-        };
+        // Update preview
+        const preview = URL.createObjectURL(file);
+        setSelectedImg(preview);
+
+        // Construct FormData
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Call updateProfile with raw FormData
+        await updateProfile(formData);
     };
 
     useEffect(() => {
