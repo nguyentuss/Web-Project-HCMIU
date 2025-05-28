@@ -405,8 +405,7 @@
             },            "description": "Create a new video"
           },
           "response": []
-        },
-        {
+        },        {
           "name": "View Video",
           "request": {
             "method": "POST",
@@ -416,6 +415,19 @@
               "path": ["api", "videos", "1", "view"]
             },
             "description": "Increment the view count for a video"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Similar Videos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/1/similar",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "1", "similar"]
+            },
+            "description": "Get videos similar to the specified video based on title similarity"
           },
           "response": []
         }

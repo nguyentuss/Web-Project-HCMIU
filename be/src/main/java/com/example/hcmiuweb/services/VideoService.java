@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -177,5 +178,44 @@ public class VideoService {
                     return convertToDTO(updatedVideo);
                 })
                 .orElseThrow(() -> new RuntimeException("Video not found with id: " + videoId));
+    }    @Transactional(readOnly = true)
+    public List<VideoDTO> findSimilarVideos(Long videoId) {
+        // First get the video to extract its title
+        Optional<Video> currentVideo = videoRepository.findById(videoId);
+        if (currentVideo.isEmpty()) {
+            return List.of(); // Return empty list if video not found
+        }
+        
+        String videoTitle = currentVideo.get().getTitle();
+        if (videoTitle == null || videoTitle.trim().isEmpty()) {
+            // If no title, try to find videos from the same category
+            List<Video> similarVideos = videoRepository.findSimilarVideos(videoId, "");
+            return similarVideos.stream()
+                    .map(this::convertToDTO)
+                    .limit(10)
+                    .collect(Collectors.toList());
+        }
+        
+        // Try different search strategies
+        List<Video> similarVideos = new ArrayList<>();
+        
+        // 1. Search with full title
+        similarVideos.addAll(videoRepository.findSimilarVideos(videoId, videoTitle));
+        
+        // 2. Search with individual words from title
+        String[] words = videoTitle.split("\\s+");
+        for (String word : words) {
+            if (word.length() > 2) { // Only use words longer than 2 characters
+                List<Video> wordMatches = videoRepository.findSimilarVideos(videoId, word);
+                similarVideos.addAll(wordMatches);
+            }
+        }
+        
+        // Remove duplicates and convert to DTOs
+        return similarVideos.stream()
+                .distinct() // Remove duplicates
+                .map(this::convertToDTO)
+                .limit(10) // Limit to 10 similar videos
+                .collect(Collectors.toList());
     }
 }

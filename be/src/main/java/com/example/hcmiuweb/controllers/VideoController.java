@@ -196,6 +196,17 @@ public class VideoController {
         }
     }
 
+    @GetMapping("/{id}/similar")
+    public ResponseEntity<List<VideoDTO>> getSimilarVideos(@PathVariable Long id) {
+        try {
+            List<VideoDTO> similarVideos = videoService.findSimilarVideos(id);
+            return ResponseEntity.ok(similarVideos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
         e.printStackTrace();
