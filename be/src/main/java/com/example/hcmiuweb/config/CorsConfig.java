@@ -14,8 +14,10 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         
-        // Allow your frontend origin
+        // Allow your frontend origins
         config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://hcmiu-project-web.id.vn");
+        config.addAllowedOrigin("http://hcmiu-project-web.id.vn");
         
         // Allow credentials
         config.setAllowCredentials(true);

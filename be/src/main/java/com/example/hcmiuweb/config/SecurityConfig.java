@@ -82,7 +82,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Your frontend URL
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173", 
+            "https://hcmiu-project-web.id.vn", 
+            "http://hcmiu-project-web.id.vn"
+        )); // Your frontend URLs
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

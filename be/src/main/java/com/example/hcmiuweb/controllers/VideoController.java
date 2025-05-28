@@ -20,7 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "http://172.18.0.3:5173"})
+@CrossOrigin(origins = {
+    "http://localhost:5173", 
+    "http://172.18.0.3:5173", 
+    "https://hcmiu-project-web.id.vn", 
+    "http://hcmiu-project-web.id.vn"
+})
 @RequestMapping("/api/videos")
 public class VideoController {
 

@@ -11,6 +11,23 @@ export default defineConfig({
   resolve: {
     alias: [{ find: "@", replacement: resolve(__dirname, "./src") }],
   },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          utils: ['axios', 'zustand']
+        }
+      }
+    }
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
   server: {
     host: '0.0.0.0', // Allows external access (needed for Docker)
     port: 5173, // Default Vite port

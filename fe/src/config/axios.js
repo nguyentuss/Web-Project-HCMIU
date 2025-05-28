@@ -1,8 +1,30 @@
 import axios from "axios";
 import { useUserStore } from "../stores/useUserStore"
 
+// Function to determine the correct API base URL
+const getApiBaseUrl = () => {
+	// Check if environment variable is set
+	if (import.meta.env.VITE_API_BASE_URL) {
+		return import.meta.env.VITE_API_BASE_URL;
+	}
+	
+	// For Docker environment, use backend service name
+	// This works when both frontend and backend are in the same Docker network
+	if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+		// When accessing frontend via localhost, the backend API should also be accessed via localhost
+		return 'http://localhost:8080/api';
+	}
+	
+	// Fallback logic based on current window location
+	const currentHost = window.location.host;
+	const protocol = window.location.protocol;
+	
+	// If accessing via domain, use the same domain for API
+	return `${protocol}//${currentHost}/api`;
+};
+
 const axiosInstance = axios.create({
-	baseURL: "http://localhost:8080/api",
+	baseURL: getApiBaseUrl(),
 	withCredentials: true, // Always send cookies
 });
 
