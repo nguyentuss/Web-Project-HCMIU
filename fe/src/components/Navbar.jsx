@@ -5,7 +5,7 @@ import SearchCard from './SearchCard'
 import OptimizedImage from './OptimizedImage'
 
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { LockClosedIcon, BookmarkIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { LockClosedIcon, BookmarkIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 import { useVideoStore } from '../stores/useVideoStore';
 import { useUserStore } from "../stores/useUserStore";
@@ -51,24 +51,23 @@ const Navbar = () => {
         setIsSearchFocused(false)
     }
 
-    
     const handleSearch = async (e) => {
-		e.preventDefault();
-		try {
-			await fetchVideosBySearch(searchQuery);
+        e.preventDefault();
+        try {
+            await fetchVideosBySearch(searchQuery);
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
             setIsSearchFocused(false);
-		} catch (err) {
-			console.error('Error searching videos: ' + err);
+        } catch (err) {
+            console.error('Error searching videos: ' + err);
             toast.error('Could not search videos. Please try again.');
-		}
+        }
     }
 
     return (
         <Disclosure as="nav" className="shadow-sm">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="relative flex h-16 items-center justify-between">
-                <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                    <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         {/* Mobile menu button*/}
                         <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-primary-text hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset">
                             <span className="absolute -inset-0.5" />
@@ -96,42 +95,63 @@ const Navbar = () => {
                         { user ? (
                             <>
                                 <div className="relative" ref={searchRef}>
-                                    <form onSubmit={handleSearch}>
-                                        <input
-                                            type="text"
-                                            placeholder="Search..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            onFocus={() => setIsSearchFocused(true)}
-                                            className="hidden md:block w-64 px-4 py-2 rounded-full border border-gray-300 text-white focus:outline-none focus:border-purple-500"
-                                        />
-                                        <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    {/* Search Icon */}
+                                    <button
+                                        onClick={() => setIsSearchFocused(true)}
+                                        className="block p-1 text-gray-400 hover:text-white cursor-pointer"
+                                    >
+                                        <MagnifyingGlassIcon className="w-6 h-6" />
+                                    </button>
 
-                                    
-                                    {/* Search Card with Animation
+                                    {/* Search Overlay and Card */}
                                     <AnimatePresence>
                                         {isSearchFocused && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -10 }}
-                                                transition={{ duration: 0.2, ease: "easeOut" }}
-                                                className="absolute top-full left-0 mt-2 w-full z-50"
-                                            >
-                                                <SearchCard
-                                                    recentSearches={recentSearches}
-                                                    onMovieClick={handleMovieClick}
-                                                    onRecentSearchClick={handleRecentSearchClick}
+                                            <>
+                                                {/* Dark Overlay */}
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="fixed inset-0 bg-black/50 z-40"
+                                                    onClick={() => setIsSearchFocused(false)}
                                                 />
-                                            </motion.div>
+                                                
+                                                {/* Search Card */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: -10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -10 }}
+                                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                                    className="fixed top-16 left-0 lg:left-auto w-full lg:w-1/6 z-50"
+                                                >
+                                                    <div className="bg-pm-gray shadow-lg p-4">
+                                                        <form onSubmit={handleSearch} className="mb-4">
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Search..."
+                                                                    value={searchQuery}
+                                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                                    className="w-full px-4 py-2 rounded-full border border-gray-600 text-white bg-primary-text focus:outline-none focus:border-purple-500"
+                                                                    autoFocus
+                                                                />
+                                                                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                        <SearchCard
+                                                            recentSearches={recentSearches}
+                                                            onMovieClick={handleMovieClick}
+                                                            onRecentSearchClick={handleRecentSearchClick}
+                                                        />
+                                                    </div>
+                                                </motion.div>
+                                            </>
                                         )}
                                     </AnimatePresence>
-                                    */}
                                 </div>
 
                                 {/* Watch List */}
@@ -200,7 +220,6 @@ const Navbar = () => {
                             </Link>
                         </>
                         )}
-
                     </div>
                 </div>
             </div>

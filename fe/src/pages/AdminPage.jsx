@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useVideoStore } from "../stores/useVideoStore";
 
 import CreateVideoForm from "../components/CreateVideoForm";
+import VideoList from "../components/VideoList";
 import OptimizedImage from '../components/OptimizedImage';
 
 const tabs = [
@@ -59,6 +60,7 @@ const AdminPage = () => {
 					))}
 				</div>
 				{activeTab === "create" && <CreateVideoForm />}
+				{activeTab === "videos" && <VideoList />}
 			</div>
 		</div>
     )

@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 export const useVideoStore = create((set) => ({
 	videos: [],
 	video: [],
+	similarVideos: [],
 	searchResults: [],
 	loading: false,
 
@@ -56,6 +57,17 @@ export const useVideoStore = create((set) => ({
 		}
 	},
 
+	fetchSimilarVideos: async (id) => {
+		set({ loading: true });
+		try {
+			const response = await axios.get(`/videos/${id}/similar`, { withCredentials: true });
+			set({ similarVideos: response.data, loading: false });
+		} catch (error) {
+			set({ error: "Failed to fetch similar videos", loading: false });
+			toast.error(error.response.data.error || "Failed to fetch similar videos");
+		}
+	},
+
 	fetchVideosByCategory: async (category) => {
 		set({ loading: true });
 		try {
@@ -80,6 +92,22 @@ export const useVideoStore = create((set) => ({
 		} catch (error) {
 			set({ error: "Failed to fetch search results", loading: false });
 			toast.error(error.response.data.error || "Failed to fetch search results");
+		}
+	},
+
+	updateVideo: async (videoId, videoData) => {
+		set({ loading: true });
+		try {
+			const res = await axios.put(`/videos/${videoId}`, videoData, { withCredentials: true });
+			set((prevState) => ({
+				videos: prevState.videos.map((video) => 
+					video.id === videoId ? res.data : video
+				),
+				loading: false,
+			}));
+		} catch (error) {
+			toast.error(error.response.data.error || "Failed to update video");
+			set({ loading: false });
 		}
 	},
 	

@@ -147,6 +147,7 @@ const WatchPage = () => {
     const handleVideoPlay = () => {
         // Implementation of handleVideoPlay function
     };
+    console.log(user)
 
     const handleWatchListToggle = async () => {
         try {
@@ -559,7 +560,7 @@ const WatchPage = () => {
                     </div>
                 */}
 
-                <Sidebar />
+                <Sidebar vid={video.id} />
             </div>
         </div>
     )

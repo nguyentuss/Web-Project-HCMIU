@@ -8,20 +8,20 @@ const SearchCard = ({
   onRecentSearchClick 
 }) => {
   return (
-    <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-6">
+    <div className="w-full max-w-2xl bg-pm-gray text-white rounded-lg shadow-lg">
       {/* Recent Searches Section */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Searches</h2>
+        <h2 className="text-xl font-semibold mb-4">Recent Searches</h2>
         <div className="space-y-2">
           {recentSearches.map((search, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+              className="flex items-center justify-between p-2 hover:bg-pm-purple-hover rounded-lg cursor-pointer transition-colors"
               onClick={() => onRecentSearchClick(search)}
             >
               <div className="flex items-center">
                 <svg
-                  className="w-5 h-5 text-gray-400 mr-2"
+                  className="w-5 h-5 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -33,7 +33,7 @@ const SearchCard = ({
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-                <span className="text-gray-700">{search}</span>
+                <span className="">{search}</span>
               </div>
               <span className="text-xs text-gray-500">
                 {new Date().toLocaleDateString()}

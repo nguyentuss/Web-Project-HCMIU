@@ -5,17 +5,17 @@ import { useVideoStore } from '../stores/useVideoStore'
 import { StarIcon } from '@heroicons/react/24/solid';
 import OptimizedImage from './OptimizedImage';
 
-const Sidebar = () => {
-    const { videos, fetchAllVideos, loading } = useVideoStore();
+const Sidebar = ({vid}) => {
+    const { similarVideos, fetchSimilarVideos, loading } = useVideoStore();
 
     useEffect(() => {
-        fetchAllVideos();
-    }, [fetchAllVideos]);
+        fetchSimilarVideos(vid);
+    }, [vid, fetchSimilarVideos]);
 
     return (
         <div className="lg:w-md bg-pm-gray text-white px-3 lg:pr-24 lg:py-6 overflow-y-auto">
             <ul>
-                {videos.map((video) => (
+                {similarVideos.map((video) => (
                     <a key={video.id} href={`/watch/${video.id}`}>
                         <li key={video.id} className="flex space-x-3 p-2 hover:bg-se-gray cursor-pointer">
                             <OptimizedImage 
