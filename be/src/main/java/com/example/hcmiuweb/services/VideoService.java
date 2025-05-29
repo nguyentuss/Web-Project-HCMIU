@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 @Service
 public class VideoService {
@@ -116,13 +115,9 @@ public class VideoService {
                     return videoRepository.save(existingVideo);
                 })
                 .orElseThrow(() -> new RuntimeException("Video not found with id: " + video.getId()));
-    }
-
-    public void deleteVideo(Long id) {
+    }    public void deleteVideo(Long id) {
         Optional<Video> videoOptional = videoRepository.findById(id);
         if (videoOptional.isPresent()) {
-            Video video = videoOptional.get();
-
             // Log deletion attempt (using System.out since you don't have a logger configured)
             System.out.println("Deleting video with ID: " + id);
 
@@ -188,33 +183,25 @@ public class VideoService {
         
         String videoTitle = currentVideo.get().getTitle();
         if (videoTitle == null || videoTitle.trim().isEmpty()) {
-            // If no title, try to find videos from the same category
-            List<Video> similarVideos = videoRepository.findSimilarVideos(videoId, "");
-            return similarVideos.stream()
-                    .map(this::convertToDTO)
-                    .limit(10)
-                    .collect(Collectors.toList());
+            return List.of(); // Return empty list if no title
         }
         
-        // Try different search strategies
-        List<Video> similarVideos = new ArrayList<>();
+        // Use the BoW (Bag of Words) query to find similar videos
+        List<Object[]> similarVideoResults = videoRepository.findSimilarVideos(videoId, videoTitle);
         
-        // 1. Search with full title
-        similarVideos.addAll(videoRepository.findSimilarVideos(videoId, videoTitle));
-        
-        // 2. Search with individual words from title
-        String[] words = videoTitle.split("\\s+");
-        for (String word : words) {
-            if (word.length() > 2) { // Only use words longer than 2 characters
-                List<Video> wordMatches = videoRepository.findSimilarVideos(videoId, word);
-                similarVideos.addAll(wordMatches);
-            }
-        }
-        
-        // Remove duplicates and convert to DTOs
-        return similarVideos.stream()
-                .distinct() // Remove duplicates
-                .map(this::convertToDTO)
+        // Convert Object[] results to VideoDTO
+        // Each Object[] contains: [videoId, videoName, similarWords]
+        return similarVideoResults.stream()
+                .filter(result -> result.length >= 3 && result[2] != null) // Filter out results with no similarity
+                .filter(result -> ((Number) result[2]).intValue() > 0) // Only include videos with at least 1 similar word
+                .map(result -> {
+                    Long id = ((Number) result[0]).longValue();
+                    // Fetch the full Video entity to create proper DTO
+                    return videoRepository.findById(id)
+                            .map(this::convertToDTO)
+                            .orElse(null);
+                })
+                .filter(dto -> dto != null) // Remove any null results
                 .limit(10) // Limit to 10 similar videos
                 .collect(Collectors.toList());
     }
