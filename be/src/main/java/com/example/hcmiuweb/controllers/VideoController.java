@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = {
@@ -160,30 +161,120 @@ public class VideoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error processing video request: " + e.getMessage());
         }
+    }    @PutMapping("/{id}")
+    public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody Map<String, Object> videoRequest) {
+        try {
+            // Get the currently authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Long authenticatedUserId = userDetails.getId();
+            
+            // Find the existing video
+            Optional<Video> existingVideoOpt = videoService.findVideoById(id);
+            if (existingVideoOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Video existingVideo = existingVideoOpt.get();
+            
+            // Check if user is trying to update a video for another user
+            if (!existingVideo.getUploader().getId().equals(authenticatedUserId)) {
+                // Check if user has admin role
+                boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                
+                if (!isAdmin) {
+                    // Regular users can only update their own videos
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("You are not allowed to update another user's video");
+                }
+                // Admins can proceed to update videos for other users
+            }
+            
+            // Create updated video object
+            Video updatedVideo = new Video();
+            updatedVideo.setId(id);
+            updatedVideo.setTitle((String) videoRequest.get("title"));
+            updatedVideo.setDescription((String) videoRequest.get("description"));
+            updatedVideo.setUrl((String) videoRequest.get("url"));
+            updatedVideo.setThumbnailUrl((String) videoRequest.get("thumbnailUrl"));
+            
+            // Handle duration if provided
+            if (videoRequest.get("duration") != null) {
+                updatedVideo.setDuration(Integer.valueOf(videoRequest.get("duration").toString()));
+            }
+            
+            // Preserve existing uploader
+            updatedVideo.setUploader(existingVideo.getUploader());
+            
+            // Handle category update if provided
+            if (videoRequest.get("categoryId") != null) {
+                Long categoryId = Long.valueOf(videoRequest.get("categoryId").toString());
+                Category category = categoryService.findCategoryById(categoryId)
+                        .orElse(null);
+                
+                if (category == null) {
+                    return ResponseEntity.badRequest()
+                            .body("Category with ID " + categoryId + " does not exist");
+                }
+                updatedVideo.setCategory(category);
+            } else {
+                // Preserve existing category
+                updatedVideo.setCategory(existingVideo.getCategory());
+            }
+            
+            // Preserve upload date and view count
+            updatedVideo.setUploadDate(existingVideo.getUploadDate());
+            updatedVideo.setViewCount(existingVideo.getViewCount());
+            
+            // Save updated video
+            Video savedVideo = videoService.updateVideo(updatedVideo);
+
+            // Return the DTO with rating info
+            VideoDTO videoDTO = videoService.findVideoByIdWithRating(savedVideo.getId())
+                    .orElseThrow(() -> new RuntimeException("Could not retrieve updated video"));
+
+            return ResponseEntity.ok(videoDTO);        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating video: " + e.getMessage());
+        }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody Video video) {
-        return videoService.findVideoById(id)
-                .map(existingVideo -> {
-                    video.setId(id);
-                    Video updatedVideo = videoService.updateVideo(video);
-
-                    // Return the DTO with rating info
-                    VideoDTO videoDTO = videoService.findVideoByIdWithRating(updatedVideo.getId())
-                            .orElseThrow(() -> new RuntimeException("Could not retrieve updated video"));
-
-                    return ResponseEntity.ok(videoDTO);
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
-        return videoService.findVideoById(id)
-                .map(video -> {
-                    videoService.deleteVideo(id);
-                    return ResponseEntity.ok().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
+        try {
+            // Get the currently authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Long authenticatedUserId = userDetails.getId();
+            
+            // Find the existing video
+            Optional<Video> existingVideoOpt = videoService.findVideoById(id);
+            if (existingVideoOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Video existingVideo = existingVideoOpt.get();
+            
+            // Check if user is trying to delete a video for another user
+            if (!existingVideo.getUploader().getId().equals(authenticatedUserId)) {
+                // Check if user has admin role
+                boolean isAdmin = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                
+                if (!isAdmin) {
+                    // Regular users can only delete their own videos
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("You are not allowed to delete another user's video");
+                }
+                // Admins can proceed to delete videos for other users
+            }
+            
+            // Delete the video
+            videoService.deleteVideo(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting video: " + e.getMessage());
+        }
     }
     
     @PostMapping("/{id}/view")
