@@ -39,5 +39,10 @@ export default defineConfig({
       'hcmiu-project-web.id.vn', 
       'localhost', 
     ],
+    hmr: {
+      host: 'hcmiu-project-web.id.vn',
+      protocol: 'wss',
+      port: 443,
+    },
   },
 })

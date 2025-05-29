@@ -12,13 +12,16 @@ const HomePageAuth = () => {
         fetchAllCategories();
     }, [fetchAllCategories]);
     
+    // Ensure categories is always an array
+    const safeCategories = Array.isArray(categories) ? categories : [];
+    
     return (
         <div>
             {/* Video Carousel */}
             <VideoCarousel />
 
             {/* Video Sections*/}
-            {categories.map(category => {
+            {safeCategories.map(category => {
                 return (
                     <VideoSection key={category.id} cid={category.id} name={category.name} />
                 )

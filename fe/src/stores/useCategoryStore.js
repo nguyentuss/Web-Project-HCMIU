@@ -3,7 +3,7 @@ import axios from "../config/axios";
 import toast from "react-hot-toast";
 
 export const useCategoryStore = create((set) => ({
-    categories: [],
+    categories: [], // Ensure initial state is always an array
     loading: false,
 
 	setCategories: (categories) => set({ categories }),
