@@ -34,10 +34,40 @@
               "raw": "{{baseUrl}}/api/auth/signin",
               "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "signin"]
-            },
-            "description": "Authenticate a user and receive a JWT token"
+            },            "description": "Authenticate a user and receive a JWT token"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Successful Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"username\": \"user1\",\n    \"password\": \"password123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/auth/signin",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "auth", "signin"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"token\": null,\n    \"id\": 4,\n    \"username\": \"user1\",\n    \"email\": \"user1@example.com\",\n    \"avatar\": \"/resources/static/images/avatars/user1-avatar.jpg\",\n    \"roles\": [\"ROLE_USER\"]\n}"
+            }
+          ]
         },
         {
           "name": "Register",

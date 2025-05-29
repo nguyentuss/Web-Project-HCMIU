@@ -30,7 +30,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,12 +64,12 @@ public class AuthController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {
-                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                return ResponseEntity.ok(new JwtResponse(
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();                return ResponseEntity.ok(new JwtResponse(
                     null, // Don't send token in response
                     userDetails.getId(),
                     userDetails.getUsername(),
                     userDetails.getEmail(),
+                    userDetails.getAvatar(),
                     userDetails.getAuthorities().stream()
                         .map(item -> item.getAuthority())
                         .collect(Collectors.toList())
@@ -106,13 +105,12 @@ public class AuthController {
             jwtCookie.setMaxAge(24 * 60 * 60); // 24 hours
             response.addCookie(jwtCookie);
 
-            logger.info("User {} successfully authenticated", loginRequest.getUsername());
-
-            return ResponseEntity.ok(new JwtResponse(
+            logger.info("User {} successfully authenticated", loginRequest.getUsername());            return ResponseEntity.ok(new JwtResponse(
                 null, // Don't send token in response
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
+                userDetails.getAvatar(),
                 roles
             ));
         } catch (BadCredentialsException e) {

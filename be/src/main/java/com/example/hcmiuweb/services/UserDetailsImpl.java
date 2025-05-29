@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
     private Long id;
@@ -16,31 +15,29 @@ public class UserDetailsImpl implements UserDetails {
     private String email;
     @JsonIgnore
     private String password;
-    private Collection<? extends GrantedAuthority> authorities;
-
-    public UserDetailsImpl(Long id, String username, String email, String password,
+    private String avatar;
+    private Collection<? extends GrantedAuthority> authorities;    public UserDetailsImpl(Long id, String username, String email, String password, String avatar,
                            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.avatar = avatar;
         this.authorities = authorities;
     }
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> auths = List.of(new SimpleGrantedAuthority(user.getRole().getRoleName()));
-
-        return new UserDetailsImpl(
+        List<GrantedAuthority> auths = List.of(new SimpleGrantedAuthority(user.getRole().getRoleName()));        return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getAvatar(),
                 auths
         );
-    }
-
-    public Long getId() { return id; }
+    }    public Long getId() { return id; }
     public String getEmail() { return email; }
+    public String getAvatar() { return avatar; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
