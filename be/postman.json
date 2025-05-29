@@ -435,7 +435,62 @@
             },            "description": "Create a new video"
           },
           "response": []
-        },        {
+        },
+        {
+          "name": "Update Video",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Video Title\",\n    \"description\": \"Updated video description\",\n    \"url\": \"https://example.com/updated-video.mp4\",\n    \"thumbnailUrl\": \"https://example.com/updated-thumbnail.jpg\",\n    \"categoryId\": 2,\n    \"duration\": 120\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "1"]
+            },            "description": "Update an existing video. Only the video owner or admin can update a video."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Video",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/videos/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videos", "1"]
+            },
+            "description": "Delete an existing video. Only the video owner or admin can delete a video."
+          },
+          "response": []
+        },{
           "name": "View Video",
           "request": {
             "method": "POST",
