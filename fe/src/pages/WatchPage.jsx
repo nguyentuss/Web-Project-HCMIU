@@ -560,7 +560,7 @@ const WatchPage = () => {
                     </div>
                 */}
 
-                <Sidebar vid={video.id} />
+                <Sidebar />
             </div>
         </div>
     )
