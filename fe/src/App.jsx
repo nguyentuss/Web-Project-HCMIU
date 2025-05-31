@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import ScrollToTop from "./components/ScrollToTop"
+import { LoadingBarProvider } from "./contexts/LoadingBarContext"
 
 import HomePageAuth from './pages/HomePageAuth'
 import LogInPage from "./pages/LogInPage"
@@ -28,35 +29,35 @@ const App = () => {
         checkAuth();
     }, [checkAuth]);
 
-    if (checkingAuth) return <LoadingSpinner />;
+    if (checkingAuth) return <LoadingSpinner />;    return (
+        <LoadingBarProvider>
+            <div className="font-outfit">
+                <ScrollToTop />
 
-    return (
-        <div className="font-outfit">
-            <ScrollToTop />
+                <div className="bg-black sticky top-0 z-40">
+                    <Navbar />
+                </div>
 
-            <div className="bg-black sticky top-0 z-40">
-                <Navbar />
+                <Routes>
+                    <Route path="/" element={user ? <HomePageAuth /> : <HomePage />} />
+
+                    <Route path='/signup' element={!user ? <SignUpPage /> : <Navigate to='/' />} />
+                    <Route path='/login' element={!user ? <LogInPage /> : <Navigate to='/' />} />
+                    <Route path='/otp-verification' element={!user ? <OTPVerificationPage /> : <Navigate to='/login' />} />
+
+                    <Route path="/watch/:id" element={<WatchPage />} />
+                    <Route path="/search" element={<SearchPage />} />
+
+                    <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
+                    <Route path="/watchlist/:id" element={user ? <WatchListPage /> : <Navigate to="/" />} />
+
+                    <Route path="/admin/:id" element={<AdminPage />} />
+                </Routes>
+
+                <Footer />
+                <Toaster />
             </div>
-
-            <Routes>
-                <Route path="/" element={user ? <HomePageAuth /> : <HomePage />} />
-
-                <Route path='/signup' element={!user ? <SignUpPage /> : <Navigate to='/' />} />
-                <Route path='/login' element={!user ? <LogInPage /> : <Navigate to='/' />} />
-                <Route path='/otp-verification' element={!user ? <OTPVerificationPage /> : <Navigate to='/login' />} />
-
-                <Route path="/watch/:id" element={<WatchPage />} />
-                <Route path="/search" element={<SearchPage />} />
-
-                <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
-                <Route path="/watchlist/:id" element={user ? <WatchListPage /> : <Navigate to="/" />} />
-
-                <Route path="/admin/:id" element={<AdminPage />} />
-            </Routes>
-
-            <Footer />
-            <Toaster />
-        </div>
+        </LoadingBarProvider>
     )
 }
 

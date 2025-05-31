@@ -14,14 +14,14 @@ node_modules/
 /build
 
 # Media files
-fe/public/videos/
-fe/public/assets/
-**/*.mp4
-**/*.mov
-**/*.avi
-**/*.mkv
-**/*.webm
-**/*.wmv
+# fe/public/videos/
+# fe/public/assets/
+# **/*.mp4
+# **/*.mov
+# **/*.avi
+# **/*.mkv
+# **/*.webm
+# **/*.wmv
 
 # Misc
 .DS_Store

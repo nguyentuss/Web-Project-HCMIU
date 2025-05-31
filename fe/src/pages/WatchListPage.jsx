@@ -4,11 +4,13 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { useUserStore } from '../stores/useUserStore';
 import { useWatchListStore } from '../stores/useWatchListStore';
+import { useNavigateWithLoading } from '../hooks/useNavigateWithLoading';
 import OptimizedImage from '../components/OptimizedImage';
 import toast from 'react-hot-toast';
 
 const WatchListPage = () => {
     const navigate = useNavigate();
+    const navigateWithLoading = useNavigateWithLoading();
     const { user } = useUserStore();
     const { watchList, loading, error, fetchWatchList, removeFromWatchList } = useWatchListStore();
 
@@ -54,11 +56,10 @@ const WatchListPage = () => {
                 ) : (
                     <div className="flex flex-col gap-3">
                         {watchList.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between px-5 py-2 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-colors">
-                                <div 
-                                    className="flex gap-3 cursor-pointer flex-1"
-                                    onClick={() => navigate(`/watch/${item.id}`)}
-                                >
+                            <div key={item.id} className="flex items-center justify-between px-5 py-2 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-colors">                            <div 
+                                className="flex gap-3 cursor-pointer flex-1"
+                                onClick={() => navigateWithLoading(`/watch/${item.id}`)}
+                            >
                                     <OptimizedImage 
                                         src={`../assets/${item.thumbnailUrl}`} 
                                         alt={item.title} 

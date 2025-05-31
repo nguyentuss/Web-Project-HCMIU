@@ -49,33 +49,35 @@ const VideoCarousel = () => {
     
         return () => {
             resetTimeout();
-        };
-    }, [current]);
+        };    }, [current]);
 
     return (
-        <div className="w-full overflow-hidden relative aspect-[4/3] md:aspect-[16/9]">
+        <div className="w-full overflow-hidden relative aspect-[16/9] max-h-[80vh]">
             <div
-                className="flex transition-transform duration-700 ease-in-out"
+                className="flex transition-transform duration-700 ease-in-out h-full"
                 style={{ transform: `translateX(-${current * 100}%)`, width: `${carouselVideos.length * 100}%` }}
-            >
-                {carouselVideos.map((video) => (
-                <div key={video.id} className="h-screen flex items-center justify-center flex-shrink-0">
-                    <div className="relative w-full h-full">
-                        <div className="absolute inset-0 bg-gray-800 animate-pulse" />
-                        <OptimizedImage
+            >{carouselVideos.map((video) => (
+                <div key={video.id} className="w-full h-full flex-shrink-0 relative overflow-hidden">
+                    <div className="relative w-full h-full bg-gray-900">
+                        <img
                             src={video.carouselImg}
                             alt={`Slide ${video.id + 1}`}
                             loading="lazy"
+                            className="w-full h-full object-cover object-center"
+                            style={{
+                                objectFit: 'cover',
+                                objectPosition: 'center',
+                                width: '100%',
+                                height: '100%'
+                            }}
                         />
                     </div>
                 </div>
                 ))}
-            </div>
-
-            {/* Left overlay with text */}
+            </div>            {/* Left overlay with text */}
             <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-black/90 via-black/40 to-transparent z-10">
                 <div className="h-full w-1/2 flex items-center px-10 md:px-44 text-white">
-                    <div className="relative h-[200px] lg:h-[600px] w-full">
+                    <div className="relative h-[100px] lg:h-[600px] w-full">
                         <div>
                             {carouselVideos.map((video, index) => (
                                 <div key={index} className={`${current === index ? 'block' : 'hidden'}`}>
@@ -96,9 +98,7 @@ const VideoCarousel = () => {
                                     </p>
                                 </div>
                             ))}
-                        </div>
-
-                        {/* Buttons and Indicators - Fixed at bottom */}
+                        </div>                        {/* Buttons and Indicators - Fixed at bottom */}
                         <div className="hidden md:block absolute top-40 lg:top-50 left-0 w-full">
                             <div className="flex items-center gap-x-2 mb-10">
                                 <Link to="#" className="flex items-center gap-x-2 bg-pm-purple hover:bg-pm-purple-hover transition-colors text-white font-semibold px-6 py-3 rounded">

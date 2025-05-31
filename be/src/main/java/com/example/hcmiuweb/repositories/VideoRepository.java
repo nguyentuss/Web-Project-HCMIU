@@ -43,5 +43,5 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
             "LIMIT 10", nativeQuery = true)
     List<Object[]> findSimilarVideos(@Param("videoId") Long videoId, @Param("query") String query);
 
-
+    
 }
