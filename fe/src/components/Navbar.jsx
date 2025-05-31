@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import SearchCard from './SearchCard'
 import OptimizedImage from './OptimizedImage'
+import { useNavigateWithLoading } from '../hooks/useNavigateWithLoading'
 
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { LockClosedIcon, BookmarkIcon, Bars3Icon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
@@ -14,6 +15,7 @@ import toast from "react-hot-toast"
 
 const Navbar = () => {
     const navigate = useNavigate();
+    const navigateWithLoading = useNavigateWithLoading();
 
     const { fetchVideosBySearch } = useVideoStore();
 
@@ -37,9 +39,7 @@ const Navbar = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside)
         }
-    }, []);
-
-    const handleMovieClick = (movie) => {
+    }, []);    const handleMovieClick = (movie) => {
         // Handle movie selection
         console.log('Selected movie:', movie)
         setIsSearchFocused(false)
@@ -55,7 +55,7 @@ const Navbar = () => {
         e.preventDefault();
         try {
             await fetchVideosBySearch(searchQuery);
-            navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            navigateWithLoading(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
             setIsSearchFocused(false);
         } catch (err) {
             console.error('Error searching videos: ' + err);

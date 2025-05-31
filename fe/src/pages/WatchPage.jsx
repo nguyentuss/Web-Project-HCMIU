@@ -4,10 +4,12 @@ import toast from 'react-hot-toast';
 import axios from "axios";
 
 import { useUserStore } from '../stores/useUserStore';
-import { useVideoStore } from '../stores/useVideoStore';
-import { useCommentStore } from '../stores/useCommentStore';
-import { useWatchListStore } from '../stores/useWatchListStore';
-import { useCommentInteractionStore } from '../stores/useCommentInteractionStore';
+import { useVideoStore } from "../stores/useVideoStore";
+import { useCommentStore } from "../stores/useCommentStore";
+import { useWatchListStore } from '../stores/useWatchListStore'
+import { useCommentInteractionStore } from '../stores/useCommentInteractionStore'
+
+import useVideoVolume from '../hooks/useVideoVolume';
 
 import Sidebar from '../components/Sidebar';
 import OptimizedImage from '../components/OptimizedImage';
@@ -21,9 +23,9 @@ import { formatDate } from "../config/format";
 
 const WatchPage = () => {
     const { id } = useParams(); // Get video ID from URL
-    const videoRef = useRef(null);
-
-    const { user } = useUserStore();
+    
+    // Use the custom video volume hook with 50% default volume
+    const { videoRef, setDefaultVolume } = useVideoVolume(0.5);    const { user } = useUserStore();
     const { video, loading, fetchVideo } = useVideoStore();
     const { videoComments, loadingComment, createComment, fetchCommentByVideo, deleteComment, createReply } = useCommentStore();
     
@@ -43,9 +45,7 @@ const WatchPage = () => {
 
     useEffect(() => {
         fetchVideo(id);
-    }, [id, fetchVideo]);
-
-    useEffect(() => {
+    }, [id, fetchVideo]);    useEffect(() => {
         fetchCommentByVideo(id);
     }, [id, fetchCommentByVideo]);
 
@@ -76,14 +76,14 @@ const WatchPage = () => {
         if (video && user) {
             setIsInWatchListState(isInWatchList(video.id));
         }
-    }, [video, user, isInWatchList]);
-
-    const handleSubmitRating = async (e) => {
+    }, [video, user, isInWatchList]);    const handleSubmitRating = async (e) => {
         e.preventDefault();
         try {
             await axios.post("http://localhost:8080/api/ratings", { videoId: video.id, userId: user.id, rating: userRating }, { withCredentials: true });
             toast.success("Rating submitted!");
-            window.location.reload();
+            
+            // Refresh video data to update rating display instead of reloading the page
+            await fetchVideo(id);
 		} catch (err) {
             console.error('Error rating video: ' + err);
             toast.error('Could not rate video. Please try again.');
@@ -100,9 +100,7 @@ const WatchPage = () => {
         setIsFocusedComment(false);
         setIsFocusedReply(false);
         setReplyToComment(null);
-    };
-
-    const handleSubmitComment = async (e) => {
+    };    const handleSubmitComment = async (e) => {
 		e.preventDefault();
 		try {
 			await createComment({ content: newComment, userId: user.id, videoId: video.id});
@@ -111,17 +109,20 @@ const WatchPage = () => {
             setShowEmojiPicker(false);
             setIsFocusedComment(false);
 
-            window.location.reload();
+            // Refresh comments data instead of reloading the page
+            await fetchCommentByVideo(id);
 		} catch (err) {
 			console.error('Error posting new comment: ' + err);
-            toast.error('Could not post comment. Please try again.');
-		}
+            toast.error('Could not post comment. Please try again.');		}
     }
 
     const handleDeleteComment = async (commentId) => {
         try {
 			await deleteComment(commentId);
             toast.success('Comment deleted successfully!');
+            
+            // Refresh comments data instead of reloading the page
+            await fetchCommentByVideo(id);
 		} catch (err) {
 			console.error('Error deleting comment: ' + err);
             toast.error('Could not delete comment. Please try again.');
@@ -136,8 +137,10 @@ const WatchPage = () => {
 			setNewReply('');
             setShowEmojiPicker(false);
             setIsFocusedReply(false);
+            setReplyToComment(null);
 
-            window.location.reload();
+            // Refresh comments data instead of reloading the page
+            await fetchCommentByVideo(id);
 		} catch (err) {
 			console.error('Error posting new reply: ' + err);
             toast.error('Could not post reply. Please try again.');
@@ -205,11 +208,15 @@ const WatchPage = () => {
     return (
         <div className="" >
             <div className="lg:flex">
-                <div className="relative flex flex-col flex-1 gap-y-5 px-5 lg:pl-24 py-6 bg-pm-gray">               
-                    {/* Video */}
+                <div className="relative flex flex-col flex-1 gap-y-5 px-5 lg:pl-24 py-6 bg-pm-gray">                    {/* Video */}
                     {!loading ? (
                         <div className="relative w-full max-w-[1920px] pb-[56.25%] h-0 aspect-video">
-                            <video className="absolute inset-0 w-full h-full" controls>
+                            <video 
+                                ref={videoRef}
+                                className="absolute inset-0 w-full h-full" 
+                                controls
+                                onLoadedMetadata={setDefaultVolume}
+                            >
                                 <source src={`../videos/${video.url}`} type="video/mp4" />
                             </video>
                         </div>
@@ -510,11 +517,12 @@ const WatchPage = () => {
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                        </div>
-
-                                                        {user.id === reply.userId && (
+                                                        </div>                                                        {user.id === reply.userId && (
                                                             <div className="ml-auto">
-                                                                <button className="p-2 rounded-full hover:bg-red-400 transition-colors cursor-pointer" >
+                                                                <button 
+                                                                    onClick={() => handleDeleteComment(reply.id)}
+                                                                    className="p-2 rounded-full hover:bg-red-400 transition-colors cursor-pointer"
+                                                                >
                                                                     <TrashIcon className="w-5 text-white" />
                                                                 </button>
                                                             </div>
@@ -524,17 +532,17 @@ const WatchPage = () => {
                                             })}
                                         </div>
                                     )}
-                                </div>
-
-                                {user.id === comment.userId && (
+                                </div>                                {user.id === comment.userId && (
                                     <div className="ml-auto">
-                                        <button className="p-2 rounded-full hover:bg-red-400 transition-colors cursor-pointer">
+                                        <button 
+                                            onClick={() => handleDeleteComment(comment.id)}
+                                            className="p-2 rounded-full hover:bg-red-400 transition-colors cursor-pointer"
+                                        >
                                             <TrashIcon className="w-5 text-white" />
                                         </button>
                                     </div>
                                 )}
-                            </div>
-                        ))}
+                            </div>                        ))}
                     </div>
                 </div>
 
