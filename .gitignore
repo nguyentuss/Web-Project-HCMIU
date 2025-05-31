@@ -14,8 +14,8 @@ node_modules/
 /build
 
 # Media files
-fe/public/videos/
-fe/public/assets/
+# fe/public/videos/
+# fe/public/assets/
 **/*.mp4
 **/*.mov
 **/*.avi
