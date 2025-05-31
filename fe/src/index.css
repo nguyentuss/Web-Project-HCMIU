@@ -16,4 +16,129 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
+      /* Modal Animations */
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .animate-fade-out {
+        animation: fadeOut 0.3s ease-out forwards;
+    }
+    
+    .animate-scale-up {
+        animation: scaleUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    .animate-scale-down {
+        animation: scaleDown 0.3s ease-in forwards;
+    }
+    
+    .animate-slide-up {
+        animation: slideUp 0.5s ease-out 0.2s forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    .animate-slide-up-delayed {
+        animation: slideUp 0.5s ease-out 0.4s forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    .animate-slide-down {
+        animation: slideDown 0.3s ease-in forwards;
+    }
+      .animate-slide-down-delayed {
+        animation: slideDown 0.3s ease-in 0.1s forwards;
+    }
+    
+    .animate-bounce-gentle {
+        animation: bounceGentle 2s infinite;
+    }
+    /* Additional animations for scroll button */
+    .animate-bounce-gentle {
+        animation: bounceGentle 2s infinite;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes scaleDown {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+@keyframes bounceGentle {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    60% {
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes bounceGentle {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-8px);
+    }
+    60% {
+        transform: translateY(-4px);
+    }
 }
