@@ -147,6 +147,7 @@ const WatchPage = () => {
     const handleVideoPlay = () => {
         // Implementation of handleVideoPlay function
     };
+    console.log(user)
 
     const handleWatchListToggle = async () => {
         try {

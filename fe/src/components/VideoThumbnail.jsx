@@ -4,7 +4,7 @@ import OptimizedImage from './OptimizedImage';
 
 const VideoThumbnail = ({videoId, title, description, url, thumbnailUrl}) => {
     return (
-        <div className="min-w-96 cursor-pointer aspect-[16/9]">
+        <div className="max-w-1/2 cursor-pointer aspect-[16/9]">
             <a href={`/watch/${videoId}`} className="relative">
                 <OptimizedImage
                     src={`./assets/${thumbnailUrl}`}
