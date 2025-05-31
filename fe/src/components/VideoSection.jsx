@@ -68,14 +68,12 @@ const VideoSection = ({cid, name}) => {
     // Don't render if no videos
     if (filteredVideos.length === 0) {
         return null;
-    }
-
-    return (
-        <div className="bg-black py-8">
+    }    return (
+        <div className="bg-black py-12 pt-16" data-video-section>
             <h2 className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-3xl font-bold text-white mb-4">
                 {name}
             </h2>
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">                {/* Left Navigation Button */}
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{/* Left Navigation Button */}
                 {filteredVideos.length > 1 && (
                     <button
                         onClick={goToPrevious}
