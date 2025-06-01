@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -27,8 +27,7 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 5173,
-  },
-  server: {
+  },  server: {
     host: '0.0.0.0', // Allows external access (needed for Docker)
     port: 5173, // Default Vite port
     watch: {
@@ -38,11 +37,10 @@ export default defineConfig({
     allowedHosts: [
       'hcmiu-project-web.id.vn', 
       'localhost', 
-    ],
-    hmr: {
-      host: 'hcmiu-project-web.id.vn',
-      protocol: 'wss',
-      port: 443,
+    ],    hmr: {
+      host: mode === 'production' ? 'hcmiu-project-web.id.vn' : 'localhost',
+      protocol: mode === 'production' ? 'wss' : 'ws',
+      port: mode === 'production' ? 443 : 5173,
     },
   },
-})
+}))

@@ -47,39 +47,41 @@ const WatchListPage = () => {
         );
     }
 
-    return (
-        <div className="bg-black min-h-screen text-white">
+    return (        <div className="bg-black min-h-screen text-white">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
                 <h1 className="text-2xl font-bold mb-5">Your Watch List</h1>
-                {watchList.length === 0 ? (
-                    <p className="text-gray-400">Your watch list is empty</p>
-                ) : (
+                {!watchList || watchList.length === 0 ? (
+                    <div className="text-center py-16">
+                        <div className="text-gray-400 text-lg mb-4">Your watch list is empty</div>
+                        <p className="text-gray-500 text-sm">Start adding videos to your watch list to see them here!</p>
+                    </div>                ) : (
                     <div className="flex flex-col gap-3">
-                        {watchList.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between px-5 py-2 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-colors">                            <div 
-                                className="flex gap-3 cursor-pointer flex-1"
-                                onClick={() => navigateWithLoading(`/watch/${item.id}`)}
-                            >
-                                    <OptimizedImage 
+                        {watchList && watchList.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between px-5 py-3 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-all duration-300 ease-out group">
+                                <div 
+                                    className="flex gap-3 cursor-pointer flex-1 transform transition-all duration-200 group-hover:scale-[1.02]"                                    onClick={() => navigateWithLoading(`/watch/${item.id}`)}
+                                >
+                                    <OptimizedImage
                                         src={`../assets/${item.thumbnailUrl}`} 
-                                        alt={item.title} 
-                                        className="max-w-32 aspect-[16/9] object-cover rounded-lg" 
+                                        alt={item.title}                                        className="max-w-32 aspect-[16/9] object-cover rounded-lg shadow-md group-hover:shadow-lg transition-all duration-300" 
                                     />
                                     <div className="flex flex-col justify-center">
-                                        <span className="text-xl font-semibold line-clamp-1">{item.title}</span>
-                                        <span className="flex items-center gap-2 text-sm text-gray-400">
-                                            <StarIcon className="w-3" />
-                                            {item.averageRating}
-                                        </span>
-                                        <span className="text-sm text-gray-400">{item.viewCount} views</span>
-                                    </div>
+                                        <span className="text-xl font-semibold line-clamp-2 mb-2">{item.title}</span>
+                                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                                            <span className="flex items-center gap-2">
+                                                <StarIcon className="w-3" />
+                                                {item.averageRating ? Number(item.averageRating).toFixed(1) : 'N/A'}
+                                            </span>
+                                            <span>{item.viewCount} views</span>
+                                        </div>                                    </div>
                                 </div>
-                                <div>
+                                <div className="ml-4">
                                     <button 
                                         onClick={() => handleRemoveFromWatchList(item.id)}
-                                        className="p-2 hover:bg-red-400 rounded-full transition-colors cursor-pointer"
+                                        className="p-2 hover:bg-red-500 rounded-full transition-all duration-300 ease-out transform hover:scale-110 hover:shadow-lg hover:shadow-red-500/25 cursor-pointer group/button"
+                                        title="Remove from watch list"
                                     >
-                                        <TrashIcon className="w-5" />
+                                        <TrashIcon className="w-5 text-white group-hover/button:text-red-100 transition-colors duration-200" />
                                     </button>
                                 </div>
                             </div>

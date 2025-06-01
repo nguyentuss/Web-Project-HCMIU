@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useVideoStore } from '../stores/useVideoStore';
 import { useCategoryStore } from '../stores/useCategoryStore';
+import { useNavigateWithLoading } from '../hooks/useNavigateWithLoading';
 
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { StarIcon, PencilIcon } from '@heroicons/react/24/solid';
@@ -9,6 +11,8 @@ import OptimizedImage from '../components/OptimizedImage';
 import toast from 'react-hot-toast';
 
 const VideoList = () => {
+    const navigate = useNavigate();
+    const navigateWithLoading = useNavigateWithLoading();
     const { videos, loading, fetchAllVideos, deleteVideo, updateVideo } = useVideoStore();
     const { categories, fetchAllCategories } = useCategoryStore();
     const [editingVideo, setEditingVideo] = useState(null);
@@ -53,13 +57,10 @@ const VideoList = () => {
                 categoryId: Number(editedVideo.categoryId)
             });
             toast.success('Video updated successfully');
-            setEditingVideo(null);
-        } catch (error) {
+            setEditingVideo(null);        } catch (error) {
             toast.error('Failed to update video');
         }
     };
-
-    console.log(editedVideo)
 
     if (loading) {
         return (
@@ -77,28 +78,26 @@ const VideoList = () => {
             ) : (
                 <div className="flex flex-col gap-3">
                     {videos.map((item) => (
-                        <div key={item.id}>
-                            <div className="flex items-center justify-between px-5 py-2 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-colors">
+                        <div key={item.id}>                            <div className="flex items-center justify-between px-5 py-2 rounded-lg bg-se-gray hover:bg-pm-purple-hover transition-colors">
                                 <div 
                                     className="flex gap-3 cursor-pointer flex-1"
-                                    onClick={() => navigate(`/watch/${item.id}`)}
+                                    onClick={() => navigateWithLoading(`/watch/${item.id}`)}
                                 >
                                     <OptimizedImage 
                                         src={`../assets/${item.thumbnailUrl}`} 
                                         alt={item.title} 
                                         className="max-w-32 aspect-[16/9] object-cover rounded-lg" 
-                                    />
-                                    <div className="flex flex-col justify-center">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xl text-white font-semibold line-clamp-1">{item.title}</span>
-                                            <span className="px-3 text-white bg-pm-purple rounded-full">{item.categoryName}</span>
+                                    />                                    <div className="flex flex-col justify-center">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="text-xl text-white font-semibold line-clamp-2">{item.title}</span>
+                                            <span className="px-3 text-white bg-pm-purple rounded-full text-sm whitespace-nowrap">{item.categoryName}</span>
+                                        </div>                                        <div className="flex items-center gap-4 text-sm text-gray-400">
+                                            <span className="flex items-center gap-2">
+                                                <StarIcon className="w-3" />
+                                                {item.averageRating ? Number(item.averageRating).toFixed(1) : 'N/A'}
+                                            </span>
+                                            <span>{item.viewCount} views</span>
                                         </div>
-
-                                        <span className="flex items-center gap-2 text-sm text-gray-400">
-                                            <StarIcon className="w-3" />
-                                            {item.averageRating}
-                                        </span>
-                                        <span className="text-sm text-gray-400">{item.viewCount} views</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 text-white">

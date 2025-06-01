@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl  # Mount SSL certificates
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+  frontend:
+    build: 
+      context: ./fe
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=https://hcmiu-project-web.id.vn/api
+    expose:
+      - "5173"
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./be
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:mysql://100.93.79.71:3306/db
+      - SPRING_DATASOURCE_USERNAME=cvip
+      - SPRING_DATASOURCE_PASSWORD=roadtowf
+    expose:
+      - "8080"
+    volumes:
+      - ./uploaded-videos:/app/videos
+    restart: unless-stopped
+
+networks:
+  default:
+    name: hcmiu-web-network
