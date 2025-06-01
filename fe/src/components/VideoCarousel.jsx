@@ -286,7 +286,7 @@ const VideoCarousel = () => {
                 </div>
             </div>            {/* Bottom dark overlay */}
             <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/100 to-transparent z-10 pointer-events-none" />            {/* Navigation Button */}
-            <div className="absolute bottom-50 right-8 z-30 flex flex-col items-center gap-3">                {/* Keyboard hint */}
+            <div className="absolute bottom-8 sm:bottom-12 md:bottom-20 lg:bottom-50 right-4 sm:right-6 md:right-8 z-30 flex flex-col items-center gap-2 sm:gap-3">                {/* Keyboard hint */}
                 <div className="hidden lg:block text-center text-xs text-white/60 mb-2 font-medium">
                     Use ↑↓ or scroll wheel
                 </div>
@@ -294,11 +294,11 @@ const VideoCarousel = () => {
                 {/* Scroll Down Button */}
                 <button
                     onClick={scrollToNextSection}
-                    className="group flex flex-col items-center gap-1 p-3 bg-black/40 hover:bg-black/60 rounded-full transition-all duration-300 ease-out transform hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-white/20 hover:border-white/40 animate-bounce-gentle hover:animate-none"
+                    className="group flex flex-col items-center gap-1 p-2 sm:p-3 bg-black/40 hover:bg-black/60 rounded-full transition-all duration-300 ease-out transform hover:scale-110 hover:shadow-lg backdrop-blur-sm border border-white/20 hover:border-white/40 animate-bounce-gentle hover:animate-none"
                     title="Scroll to videos (↓ or Page Down)"
                 >
-                    <ChevronDownIcon className="w-5 h-5 text-white group-hover:text-pm-purple transition-colors duration-300" />
-                    <span className="text-xs text-white/80 group-hover:text-white transition-colors duration-300 font-medium">
+                    <ChevronDownIcon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-white group-hover:text-pm-purple transition-colors duration-300" />
+                    <span className="text-[10px] sm:text-xs text-white/80 group-hover:text-white transition-colors duration-300 font-medium">
                         Explore
                     </span>
                 </button>

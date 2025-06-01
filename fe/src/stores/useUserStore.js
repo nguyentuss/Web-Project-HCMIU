@@ -49,6 +49,9 @@ export const useUserStore = create((set) => ({
 		try {
 			await axios.post("/auth/logout", {}, { withCredentials: true });
 			set({ user: null });
+			// Clear any cached data
+			localStorage.removeItem('user');
+			sessionStorage.removeItem('user');
 		} catch (error) {
 			toast.error(error.response?.data?.message || "Error during logout");
 		}

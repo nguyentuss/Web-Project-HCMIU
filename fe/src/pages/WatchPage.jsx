@@ -10,6 +10,7 @@ import { useWatchListStore } from '../stores/useWatchListStore'
 import { useCommentInteractionStore } from '../stores/useCommentInteractionStore'
 
 import useVideoVolume from '../hooks/useVideoVolume';
+import { checkVideoExists, getVideoSourcePaths, formatVideoDuration } from '../utils/videoUtils';
 
 import Sidebar from '../components/Sidebar';
 import OptimizedImage from '../components/OptimizedImage';
@@ -42,10 +43,76 @@ const WatchPage = () => {
     const [toggleReplies, setToggleReplies] = useState(null);
     const [replyToComment, setReplyToComment] = useState(null);
     const [isInWatchListState, setIsInWatchListState] = useState(false);
+    const [videoError, setVideoError] = useState(false);
+    const [videoLoaded, setVideoLoaded] = useState(false);
+    const [videoBuffering, setVideoBuffering] = useState(false);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [videoReadyState, setVideoReadyState] = useState(0);
+    const [preloadStarted, setPreloadStarted] = useState(false);
 
     useEffect(() => {
-        fetchVideo(id);
-    }, [id, fetchVideo]);    useEffect(() => {
+        // Reset all video states when video ID changes
+        setVideoError(false);
+        setVideoLoaded(false);
+        
+        // Fetch the video data
+        const loadVideo = async () => {
+            try {
+                console.log('Fetching video with ID:', id);
+                await fetchVideo(id);
+            } catch (error) {
+                console.error('Error fetching video:', error);
+                toast.error('Failed to load video data');
+            }
+        };
+
+        if (id) {
+            loadVideo();
+        }
+    }, [id, fetchVideo]);
+
+    // Separate effect to handle video element updates when video data changes
+    useEffect(() => {
+        if (video && videoRef.current) {
+            console.log('Video data loaded:', video);
+            // Reset loading states when new video data is available
+            setVideoError(false);
+            setVideoLoaded(false);
+            
+            // Validate video path before loading
+            const validateAndLoadVideo = async () => {
+                try {
+                    const validation = await checkVideoExists(video.url);
+                    if (validation.exists) {
+                        console.log('Video file found, loading...');
+                        // Force video element to reload with verified path
+                        setTimeout(() => {
+                            if (videoRef.current) {
+                                videoRef.current.src = validation.path;
+                                videoRef.current.load();
+                            }
+                        }, 100);
+                    } else {
+                        console.error('Video file not found:', video.url);
+                        setVideoError(true);
+                        toast.error('Video file not found. Please contact support.');
+                    }
+                } catch (error) {
+                    console.error('Error validating video:', error);
+                    // Fallback to normal loading if validation fails
+                    setTimeout(() => {
+                        if (videoRef.current) {
+                            videoRef.current.load();
+                        }
+                    }, 100);
+                }
+            };
+            
+            validateAndLoadVideo();
+        }
+    }, [video]);
+
+    useEffect(() => {
         fetchCommentByVideo(id);
     }, [id, fetchCommentByVideo]);
 
@@ -150,6 +217,99 @@ const WatchPage = () => {
     const handleVideoPlay = () => {
         // Implementation of handleVideoPlay function
     };
+
+    // Video event handlers with improved error handling and loading management
+    const handleVideoLoad = () => {
+        console.log('Video loaded successfully');
+        setVideoLoaded(true);
+        setVideoError(false);
+        setVideoBuffering(false);
+        setLoadingProgress(100);
+    };
+
+    const handleVideoError = (e) => {
+        console.error('Video loading error:', e);
+        console.error('Error details:', {
+            error: e.target.error,
+            networkState: e.target.networkState,
+            readyState: e.target.readyState,
+            currentSrc: e.target.currentSrc
+        });
+        setVideoError(true);
+        setVideoLoaded(false);
+        setVideoBuffering(false);
+        setLoadingProgress(0);
+        // Don't show toast immediately, wait for user interaction
+    };
+
+    const handleVideoCanPlay = () => {
+        console.log('Video can play');
+        setVideoLoaded(true);
+        setVideoError(false);
+        setVideoBuffering(false);
+        setLoadingProgress(90);
+    };
+
+    const handleVideoLoadStart = () => {
+        console.log('Video load started');
+        setVideoLoaded(false);
+        setVideoError(false);
+        setVideoBuffering(true);
+        setLoadingProgress(10);
+    };
+
+    const handleVideoLoadedMetadata = () => {
+        console.log('Video metadata loaded');
+        setLoadingProgress(30);
+        setDefaultVolume();
+    };
+
+    const handleVideoProgress = () => {
+        if (videoRef.current) {
+            const buffered = videoRef.current.buffered;
+            const duration = videoRef.current.duration;
+            
+            if (buffered.length > 0 && duration > 0) {
+                const bufferedEnd = buffered.end(buffered.length - 1);
+                const progress = Math.min((bufferedEnd / duration) * 100, 100);
+                setLoadingProgress(Math.max(progress, 40)); // Minimum 40% when buffering starts
+            }
+        }
+    };
+
+    const handleVideoWaiting = () => {
+        console.log('Video buffering...');
+        setVideoBuffering(true);
+    };
+
+    const handleVideoPlaying = () => {
+        console.log('Video playing');
+        setVideoBuffering(false);
+        setVideoLoaded(true);
+    };
+
+    const retryVideoLoad = () => {
+        console.log('Retrying video load');
+        setVideoError(false);
+        setVideoLoaded(false);
+        setVideoBuffering(true);
+        setLoadingProgress(0);
+        
+        if (videoRef.current) {
+            // Clear the video source first
+            videoRef.current.src = '';
+            videoRef.current.load();
+            // Set the source again after a brief delay
+            setTimeout(() => {
+                if (videoRef.current && video?.url) {
+                    // Try the most likely working path first
+                    videoRef.current.src = `/videos/${video.url}`;
+                    videoRef.current.load();
+                }
+            }, 100);
+        }
+        toast.info('Retrying video load...');
+    };
     console.log(user)
 
     const handleWatchListToggle = async () => {
@@ -209,66 +369,116 @@ const WatchPage = () => {
         <div className="" >
             <div className="lg:flex">
                 <div className="relative flex flex-col flex-1 gap-y-5 px-5 lg:pl-24 py-6 bg-pm-gray">                    {/* Video */}
-                    {!loading ? (
+                    {!loading && video?.url ? (
                         <div className="relative w-full max-w-[1920px] pb-[56.25%] h-0 aspect-video">
-                            <video 
-                                ref={videoRef}
-                                className="absolute inset-0 w-full h-full" 
-                                controls
-                                onLoadedMetadata={setDefaultVolume}
-                            >
-                                <source src={`../videos/${video.url}`} type="video/mp4" />
-                            </video>
+                            {videoError ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 text-white rounded-lg">
+                                    <div className="text-center">
+                                        <svg className="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="mb-4 text-lg">Failed to load video</p>
+                                        <p className="mb-4 text-sm text-gray-400">The video file might be missing or corrupted.</p>
+                                        <button 
+                                            onClick={retryVideoLoad}
+                                            className="px-6 py-2 bg-pm-purple hover:bg-pm-purple-hover rounded-lg transition-colors"
+                                        >
+                                            Retry Loading
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    {!videoLoaded && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-white rounded-lg z-10">
+                                            <div className="text-center">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pm-purple mx-auto mb-4"></div>
+                                                <p>Loading video...</p>
+                                                <p className="text-sm text-gray-400 mt-2">Please wait while the video loads</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <video 
+                                        ref={videoRef}
+                                        className="absolute inset-0 w-full h-full" 
+                                        controls
+                                        preload="metadata"
+                                        playsInline
+                                        onLoadStart={handleVideoLoadStart}
+                                        onLoadedMetadata={handleVideoLoadedMetadata}
+                                        onLoadedData={handleVideoLoad}
+                                        onCanPlay={handleVideoCanPlay}
+                                        onError={handleVideoError}
+                                        key={`video-${video.id}-${video.url}`} // Better key for re-rendering
+                                    >
+                                        <source src={`/videos/${video.url}`} type="video/mp4" />
+                                        <source src={`./videos/${video.url}`} type="video/mp4" />
+                                        <source src={`../videos/${video.url}`} type="video/mp4" />
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </>
+                            )}
                         </div>
                     ) : (
-                        <div className="text-white text-center py-10">Loading video...</div>
+                        <div className="relative w-full max-w-[1920px] pb-[56.25%] h-0 aspect-video">
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-800 text-white rounded-lg">
+                                <div className="text-center">
+                                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pm-purple mx-auto mb-4"></div>
+                                    <p>Loading video...</p>
+                                </div>
+                            </div>
+                        </div>
                     )}
     
-                    <div className="flex flex-col gap-4 text-white">
-                        <h1 className="text-2xl font-semibold">{video.title}</h1>
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                            {/* Video Interactions */}
-                            <div className="flex items-center justify-between gap-5">
-                                {/* Watch List Button */}
-                                <button 
-                                    onClick={handleWatchListToggle}
-                                    className={`p-2 ${isInWatchListState ? 'bg-pm-purple' : 'bg-se-gray'} hover:bg-purple-700 transition-colors rounded-full cursor-pointer`}
-                                >
-                                    <BookmarkIcon className={`h-5 ${isInWatchListState ? 'fill-white' : ''}`}/>
-                                </button>
+                    {video && (
+                        <div className="flex flex-col gap-4 text-white">
+                            <h1 className="text-2xl font-semibold">{video.title}</h1>
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                {/* Video Interactions */}
+                                <div className="flex items-center justify-between gap-5">
+                                    {/* Watch List Button */}
+                                    <button 
+                                        onClick={handleWatchListToggle}
+                                        className={`p-2 ${isInWatchListState ? 'bg-pm-purple' : 'bg-se-gray'} hover:bg-purple-700 transition-colors rounded-full cursor-pointer`}
+                                    >
+                                        <BookmarkIcon className={`h-5 ${isInWatchListState ? 'fill-white' : ''}`}/>
+                                    </button>
 
-                                <form onSubmit={handleSubmitRating} className="flex gap-2">
-                                    <select value={userRating} onChange={(e) => setUserRating(e.target.value)} className="p-2 bg-se-gray rounded-full cursor-pointer">
-                                        {[1, 2, 3, 4, 5].map((num) => (
-                                            <option key={num} value={num} className="cursor-pointer">{num} ⭐</option>
-                                        ))}
-                                    </select>
-                                    <button type="submit" className="bg-se-gray px-3 py-2 text-md rounded-full hover:bg-pm-purple-hover transition cursor-pointer">Submit Rating</button>
-                                </form>
-                            </div>
+                                    <form onSubmit={handleSubmitRating} className="flex gap-2">
+                                        <select value={userRating} onChange={(e) => setUserRating(e.target.value)} className="p-2 bg-se-gray rounded-full cursor-pointer">
+                                            {[1, 2, 3, 4, 5].map((num) => (
+                                                <option key={num} value={num} className="cursor-pointer">{num} ⭐</option>
+                                            ))}
+                                        </select>
+                                        <button type="submit" className="bg-se-gray px-3 py-2 text-md rounded-full hover:bg-pm-purple-hover transition cursor-pointer">Submit Rating</button>
+                                    </form>
+                                </div>
 
-                            {/* View & Rating Count */}
-                            <div className="flex gap-5 font-semibold text-lg">
-                                <span>{video.viewCount} Views</span>
-                                <span className="flex gap-2">
-                                    <StarIcon className="w-5" />
-                                    {video.averageRating?.toFixed(1)} ({video.ratingCount} Ratings)
-                                </span>
+                                {/* View & Rating Count */}
+                                <div className="flex gap-5 font-semibold text-lg">
+                                    <span>{video.viewCount || 0} Views</span>
+                                    <span className="flex gap-2">
+                                        <StarIcon className="w-5" />
+                                        {video.averageRating?.toFixed(1) || '0.0'} ({video.ratingCount || 0} Ratings)
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Details Section */}
-                    <div className="bg-se-gray text-white rounded-lg p-3">
-                        {/* Category */}
-                        <div className="flex items-center gap-3 font-semibold">
-                            <div className="px-3 py-1 bg-pm-purple rounded-full">
-                                <span>{video.categoryName}</span>
+                    {video && (
+                        <div className="bg-se-gray text-white rounded-lg p-3">
+                            {/* Category */}
+                            <div className="flex items-center gap-3 font-semibold">
+                                <div className="px-3 py-1 bg-pm-purple rounded-full">
+                                    <span>{video.categoryName || 'Uncategorized'}</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <p className="mt-2">{video.description}</p>
-                    </div>
+                            <p className="mt-2">{video.description || 'No description available.'}</p>
+                        </div>
+                    )}
 
                     {/* Comment Section */}
                     <div className="flex flex-col gap-4">
