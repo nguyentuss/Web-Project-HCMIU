@@ -8,12 +8,6 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = {
-    "http://localhost:5173", 
-    "http://172.18.0.3:5173", 
-    "https://hcmiu-project-web.id.vn", 
-    "http://hcmiu-project-web.id.vn"
-})
 public class TestController {
 
     @GetMapping("/test")
