@@ -215,8 +215,8 @@ const VideoCarousel = () => {
                 </div>
             ))}            {/* Left overlay with text */}
             <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-black/90 via-black/40 to-transparent z-20">
-                <div className="h-full w-1/2 flex items-center px-10 md:px-44 text-white">
-                    <div className="relative h-[100px] lg:h-[600px] w-full">
+                <div className="h-full flex items-center text-white">
+                    <div className="relative h-[100px] lg:h-[600px] w-full max-w-2xl ml-8 sm:ml-12 md:ml-16 lg:ml-20 xl:ml-24 2xl:ml-32">
                         {/* Render all text content stacked */}
                         {carouselVideos.map((video, index) => (
                             <div 
