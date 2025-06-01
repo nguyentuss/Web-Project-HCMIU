@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import axios from '../config/axios';
 
 const OTPVerificationPage = () => {
     const navigate = useNavigate();
@@ -22,13 +22,11 @@ const OTPVerificationPage = () => {
             sendOtp();
             sentRef.current = true;
         }
-    }, [email]);
-
-    const sendOtp = async () => {
+    }, [email]);    const sendOtp = async () => {
         setResendLoading(true);
         setError('');
         try {
-            await axios.post('http://localhost:8080/api/otp/send', null, { params: { email } });
+            await axios.post('/otp/send', null, { params: { email } });
             toast.success('OTP sent to your email!');
         } catch (err) {
             setError('Failed to send OTP. Please try again.');
@@ -66,15 +64,13 @@ const OTPVerificationPage = () => {
             setOtp(paste.split(''));
             inputRefs.current[5].focus();
         }
-    };
-
-    const handleSubmit = async (e) => {
+    };    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
             const code = otp.join('');
-            await axios.post('http://localhost:8080/api/otp/verify', null, { params: { email, otp: code } });
+            await axios.post('/otp/verify', null, { params: { email, otp: code } });
             toast.success('OTP verified!');
             navigate('/');
         } catch (err) {
