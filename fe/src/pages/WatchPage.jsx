@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from "react-router-dom";
 import toast from 'react-hot-toast';
-import axios from "axios";
+import axios from "../config/axios";
 
 import { useUserStore } from '../stores/useUserStore';
 import { useVideoStore } from "../stores/useVideoStore";
@@ -34,7 +34,7 @@ const WatchPage = () => {
     const { likeComment, dislikeComment, removeLike, removeDislike } = useCommentInteractionStore();
 
     const [isVideoVisible, setIsVideoVisible] = useState(false);
-    const [userRating, setUserRating] = useState(0);
+    const [userRating, setUserRating] = useState(1);
     const [isFocusedComment, setIsFocusedComment] = useState(false);
     const [isFocusedReply, setIsFocusedReply] = useState(false);
     const [newComment, setNewComment] = useState('')
@@ -146,7 +146,7 @@ const WatchPage = () => {
     }, [video, user, isInWatchList]);    const handleSubmitRating = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:8080/api/ratings", { videoId: video.id, userId: user.id, rating: userRating }, { withCredentials: true });
+            await axios.post("/ratings", { videoId: video.id, userId: user.id, rating: parseInt(userRating) });
             toast.success("Rating submitted!");
             
             // Refresh video data to update rating display instead of reloading the page
