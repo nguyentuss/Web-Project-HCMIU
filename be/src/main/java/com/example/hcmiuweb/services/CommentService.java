@@ -37,7 +37,7 @@ public class CommentService {
         this.notificationService = notificationService;
     }    
     @Transactional
-    public CommentResponse addComment(CommentRequest commentRequest) {
+    public CommentResponse addComment(CommentRequest commentRequest, Long currentUserId) {
         User user = userRepository.findById(commentRequest.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + commentRequest.getUserId()));
         
@@ -99,34 +99,34 @@ public class CommentService {
             );
         }
         
-        return new CommentResponse(savedComment);
+        return new CommentResponse(savedComment, currentUserId);
     }
     
     @Transactional
-    public List<CommentResponse> getAllComments() {
+    public List<CommentResponse> getAllComments(Long currentUserId) {
         // Get all top-level comments
         List<Comment> allComments = commentRepository.findAll();
         
         // Convert to DTOs
         return allComments.stream()
                 .filter(comment -> comment.getParentComment() == null) // Only return top-level comments
-                .map(CommentResponse::new)
+                .map(comment -> new CommentResponse(comment, currentUserId))
                 .collect(Collectors.toList());
     }
     
     @Transactional
-    public List<CommentResponse> getVideoComments(Long videoId) {
+    public List<CommentResponse> getVideoComments(Long videoId, Long currentUserId) {
         // Get top-level comments (those without a parent)
         List<Comment> topLevelComments = commentRepository.findByVideo_IdAndParentCommentIsNull(videoId);
         
         // Convert to DTOs, which will recursively include replies
         return topLevelComments.stream()
-                .map(CommentResponse::new)
+                .map(comment -> new CommentResponse(comment, currentUserId))
                 .collect(Collectors.toList());
     }
     
     @Transactional
-    public List<CommentResponse> getUserComments(Long userId) {
+    public List<CommentResponse> getUserComments(Long userId, Long currentUserId) {
         // First, check if the user exists
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
@@ -136,15 +136,15 @@ public class CommentService {
         
         // Convert to DTOs
         return userComments.stream()
-                .map(CommentResponse::new)
+                .map(comment -> new CommentResponse(comment, currentUserId))
                 .collect(Collectors.toList());
     }
     
     @Transactional
-    public CommentResponse getCommentById(Long commentId) {
+    public CommentResponse getCommentById(Long commentId, Long currentUserId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found with ID: " + commentId));
-        return new CommentResponse(comment);
+        return new CommentResponse(comment, currentUserId);
     }
 
     @Transactional

@@ -30,5 +30,31 @@ export const useCommentInteractionStore = create((set) => ({
         } finally {
             set({ loading: false });
         }
+    },
+
+    dislikeComment: async (commentId, userId) => {
+        set({ loading: true, error: null });
+        try {
+            const response = await axios.post('/comment-ratings', { commentId, userId, rating: -1 }, { withCredentials: true });
+            return response.data;
+        } catch (error) {
+            set({ error: error.message });
+            throw error;
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+    removeDislike: async (commentId) => {
+        set({ loading: true, error: null });
+        try {
+            const response = await axios.delete(`/comment-ratings/${commentId}`,{ withCredentials: true });
+            return response.data;
+        } catch (error) {
+            set({ error: error.message });
+            throw error;
+        } finally {
+            set({ loading: false });
+        }
     }
 })); 

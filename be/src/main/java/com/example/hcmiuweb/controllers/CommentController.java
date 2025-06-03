@@ -44,7 +44,7 @@ public class CommentController {
             // Set the userId in the request to the authenticated user's ID
             commentRequest.setUserId(authenticatedUserId);
             
-            CommentResponse newComment = commentService.addComment(commentRequest);
+            CommentResponse newComment = commentService.addComment(commentRequest, authenticatedUserId);
             return new ResponseEntity<>(newComment, HttpStatus.CREATED);
         } catch (Exception e) {
             return ResponseEntity
@@ -55,7 +55,15 @@ public class CommentController {
     @GetMapping
     public ResponseEntity<?> getAllComments() {
         try {
-            List<CommentResponse> comments = commentService.getAllComments();
+            // Get the authenticated user (optional for this endpoint)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long currentUserId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                currentUserId = userDetails.getId();
+            }
+            
+            List<CommentResponse> comments = commentService.getAllComments(currentUserId);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
             return ResponseEntity
@@ -67,7 +75,15 @@ public class CommentController {
     @GetMapping("/video/{videoId}")
     public ResponseEntity<?> getVideoComments(@PathVariable Long videoId) {
         try {
-            List<CommentResponse> comments = commentService.getVideoComments(videoId);
+            // Get the authenticated user (optional for this endpoint)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long currentUserId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                currentUserId = userDetails.getId();
+            }
+            
+            List<CommentResponse> comments = commentService.getVideoComments(videoId, currentUserId);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
             return ResponseEntity
@@ -79,7 +95,15 @@ public class CommentController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserComments(@PathVariable Long userId) {
         try {
-            List<CommentResponse> comments = commentService.getUserComments(userId);
+            // Get the authenticated user (optional for this endpoint)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long currentUserId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                currentUserId = userDetails.getId();
+            }
+            
+            List<CommentResponse> comments = commentService.getUserComments(userId, currentUserId);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
             return ResponseEntity
@@ -91,7 +115,15 @@ public class CommentController {
     @GetMapping("/{commentId}")
     public ResponseEntity<?> getCommentById(@PathVariable Long commentId) {
         try {
-            CommentResponse comment = commentService.getCommentById(commentId);
+            // Get the authenticated user (optional for this endpoint)
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long currentUserId = null;
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                currentUserId = userDetails.getId();
+            }
+            
+            CommentResponse comment = commentService.getCommentById(commentId, currentUserId);
             return ResponseEntity.ok(comment);
         } catch (Exception e) {
             return ResponseEntity

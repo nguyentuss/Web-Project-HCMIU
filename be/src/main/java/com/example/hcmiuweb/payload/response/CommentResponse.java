@@ -18,10 +18,18 @@ public class CommentResponse {
     private Long parentCommentId;
     private long likes;
     private long dislikes;
+    private boolean likedByUser;
+    private boolean dislikedByUser;
     private List<CommentResponse> replies = new ArrayList<>();
 
     public CommentResponse() {
-    }    public CommentResponse(Comment comment) {
+    }
+
+    public CommentResponse(Comment comment) {
+        this(comment, null);
+    }
+
+    public CommentResponse(Comment comment, Long currentUserId) {
         this.id = comment.getId();
         this.content = comment.getContent();
         this.datePosted = comment.getDatePosted();
@@ -35,10 +43,18 @@ public class CommentResponse {
             this.parentCommentId = comment.getParentComment().getId();
         }
         
+        // Set user-specific like/dislike status
+        if (currentUserId != null) {
+            this.likedByUser = comment.getRatings().stream()
+                .anyMatch(rating -> rating.getUser().getId().equals(currentUserId) && rating.getRating() > 0);
+            this.dislikedByUser = comment.getRatings().stream()
+                .anyMatch(rating -> rating.getUser().getId().equals(currentUserId) && rating.getRating() < 0);
+        }
+        
         // Process replies if any
         if (comment.getReplies() != null && !comment.getReplies().isEmpty()) {
             this.replies = comment.getReplies().stream()
-                    .map(CommentResponse::new)
+                    .map(reply -> new CommentResponse(reply, currentUserId))
                     .collect(Collectors.toList());
         }
     }
@@ -128,5 +144,21 @@ public class CommentResponse {
     
     public void setDislikes(long dislikes) {
         this.dislikes = dislikes;
+    }
+    
+    public boolean isLikedByUser() {
+        return likedByUser;
+    }
+    
+    public void setLikedByUser(boolean likedByUser) {
+        this.likedByUser = likedByUser;
+    }
+    
+    public boolean isDislikedByUser() {
+        return dislikedByUser;
+    }
+    
+    public void setDislikedByUser(boolean dislikedByUser) {
+        this.dislikedByUser = dislikedByUser;
     }
 }
