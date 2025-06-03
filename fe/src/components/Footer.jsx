@@ -49,7 +49,7 @@ const Footer = () => {
                     </div>
 
                     <div className="mt-8 flex items-center justify-between">
-                        <p className="text-sm text-gray-600">© 2025 BrosMovies. All rights reserved.</p>
+                        <p className="text-sm text-gray-600">© 2025 Netflex. All rights reserved.</p>
                     </div>
                 </div>
             </div>
