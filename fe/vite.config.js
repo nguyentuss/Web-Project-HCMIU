@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
         interval: 1000,
       },
       allowedHosts: [
-        'hcmiu-project-web.id.vn', 
+        'netflex.id.vn', 
         'localhost', 
       ],
       hmr: isDevelopment ? {

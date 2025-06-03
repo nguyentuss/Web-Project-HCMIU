@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {
     "http://localhost:5173", 
     "http://172.18.0.3:5173", 
-    "https://hcmiu-project-web.id.vn", 
-    "http://hcmiu-project-web.id.vn"
+    "https://netflex.id.vn", 
+    "http://netflex.id.vn"
 })
 @RequestMapping("/api/ratings")
 public class RatingController {
